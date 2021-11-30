@@ -11,7 +11,7 @@ def write_to_file(lines, outfile=filename, mode="w"):
 
 def main():
     lines = []
-    command_head = "singularity exec --nv -B /usr/lib64 -B /var/lib/dcv-gl --overlay /global/scratch/users/emmons/singularity/overlay-50G-10M.ext3:ro /global/scratch/users/emmons/singularity/cuda10.2-cudnn7-devel-ubuntu18.04.sif /bin/bash -c \"source /ext3/env.sh; conda activate decision-transformer-gym; cd /global/scratch/users/emmons/decision-transformer; python experiment.py -w True --model_type dt"
+    command_head = "singularity exec --nv -B /usr/lib64 -B /var/lib/dcv-gl --overlay /global/scratch/users/emmons/singularity/overlay-50G-10M.ext3:ro /global/scratch/users/emmons/singularity/cuda10.2-cudnn7-devel-ubuntu18.04.sif /bin/bash -c \"source /ext3/env.sh; conda activate decision-transformer-gym; cd /global/scratch/users/emmons/decision-transformer/gym; python experiment.py -w True --model_type dt"
     for _ in range(num_seeds):
         for dataset in datasets:
             for env in envs:

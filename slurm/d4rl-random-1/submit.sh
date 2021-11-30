@@ -2,7 +2,7 @@
 
 JOB_NAME="d4rl-random-1"
 CPUS_PER_GPU=4  # this is the number of cpus per gpu on the savio3_gpu titan nodes
-TASKS_PER_GPU=2  # set the number of tasks per gpu
+TASKS_PER_GPU=4  # set the number of tasks per gpu
 
 mkdir logs/out/ -p
 mkdir logs/err/ -p

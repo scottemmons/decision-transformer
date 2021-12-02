@@ -279,6 +279,27 @@ def experiment(
         if log_to_wandb:
             wandb.log(outputs)
 
+    if variant['conditioning_analysis']:
+        from d4rl import infos
+        normalized_env_targets = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120]
+        reward_min = infos.REF_MIN_SCORE[f"{env_name}-{dataset}-v2"]
+        reward_max = infos.REF_MAX_SCORE[f"{env_name}-{dataset}-v2"]
+        env_targets = [reward_min + (reward_max - reward_min) * (i / 100) for i in normalized_env_targets]
+
+        columns = ["normalized_env_target", "return_mean", "return_std", "length_mean", "length_std"]
+        data = []
+        for target, normalized_target in zip(env_targets, normalized_env_targets):
+            result = eval_episodes(target)(model)
+            data.append([
+                normalized_target,
+                result[f'target_{target}_return_mean'],
+                result[f'target_{target}_return_std'],
+                result[f'target_{target}_length_mean'],
+                result[f'target_{target}_length_std']
+            ])
+        table = wandb.Table(columns=columns, data=data)
+        wandb.log({'conditioning_analysis': table})
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -302,6 +323,7 @@ if __name__ == '__main__':
     parser.add_argument('--num_steps_per_iter', type=int, default=10000)
     parser.add_argument('--device', type=str, default='cuda')
     parser.add_argument('--log_to_wandb', '-w', type=bool, default=False)
+    parser.add_argument('--conditioning_analysis', type=bool, default=False)
     
     args = parser.parse_args()
 

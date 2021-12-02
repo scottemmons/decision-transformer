@@ -327,4 +327,7 @@ if __name__ == '__main__':
     
     args = parser.parse_args()
 
+    if args.conditioning_analysis and not args.log_to_wandb:
+        raise ValueError("Conditioning analysis requires logging to wandb.")
+
     experiment('gym-experiment', variant=vars(args))

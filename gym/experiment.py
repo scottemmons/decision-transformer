@@ -56,6 +56,12 @@ def experiment(
         max_ep_len = 100
         env_targets = [76, 40]
         scale = 10.
+    elif env_name == 'antmaze':
+        import d4rl
+        env = gym.make(f'{env_name}-{dataset}-v2')
+        max_ep_len = 700 if 'umaze' in dataset else 1000
+        env_targets = [1.0, 0.5] # successful trajectories have returns of 1, unsuccessful have returns of 0
+        scale = 1. # this environment only has 1 and 0 rewards.
     else:
         raise NotImplementedError
 
@@ -279,7 +285,7 @@ def experiment(
         if log_to_wandb:
             wandb.log(outputs)
 
-    if variant['conditioning_analysis']:
+    if variant['conditioning_analysis'] and model_type == 'dt':
         from d4rl import infos
         normalized_env_targets = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120]
         reward_min = infos.REF_MIN_SCORE[f"{env_name}-{dataset}-v2"]
@@ -304,7 +310,7 @@ def experiment(
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--env', type=str, default='hopper')
-    parser.add_argument('--dataset', type=str, default='medium')  # medium, medium-replay, medium-expert, expert
+    parser.add_argument('--dataset', type=str, default='medium')
     parser.add_argument('--mode', type=str, default='normal')  # normal for standard setting, delayed for sparse
     parser.add_argument('--K', type=int, default=20)
     parser.add_argument('--pct_traj', type=float, default=1.)

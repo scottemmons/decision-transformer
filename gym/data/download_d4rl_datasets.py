@@ -1,6 +1,7 @@
 import gym
 import numpy as np
 
+import argparse
 import collections
 import pickle
 
@@ -9,18 +10,25 @@ import d4rl
 
 datasets = []
 
-for env_name in ['halfcheetah', 'hopper', 'walker2d']:
-	for dataset_type in ['random', 'medium', 'medium-replay', 'medium-expert', 'expert']:
-		name = f'{env_name}-{dataset_type}-v2'
+
+def main(suite):
+	if suite == "locomotion":
+		env_names = ['halfcheetah', 'hopper', 'walker2d']
+		dataset_types = ['random', 'medium', 'medium-replay', 'medium-expert', 'expert']
+		names = [f'{env_name}-{dataset_type}-v2' for env_name in env_names for dataset_type in dataset_types]
+	elif suite == "antmaze":
+		names = ['antmaze-umaze-v2', 'antmaze-umaze-diverse-v2',
+				 'antmaze-medium-play-v2', 'antmaze-medium-diverse-v2',
+				 'antmaze-large-play-v2', 'antmaze-large-diverse-v2']
+
+	for name in names:
 		env = gym.make(name)
 		dataset = env.get_dataset()
 
 		N = dataset['rewards'].shape[0]
 		data_ = collections.defaultdict(list)
 
-		use_timeouts = False
-		if 'timeouts' in dataset:
-			use_timeouts = True
+		use_timeouts = 'timeouts' in dataset
 
 		episode_step = 0
 		paths = []
@@ -29,10 +37,12 @@ for env_name in ['halfcheetah', 'hopper', 'walker2d']:
 			if use_timeouts:
 				final_timestep = dataset['timeouts'][i]
 			else:
-				final_timestep = (episode_step == 1000-1)
+				raise RuntimeError('All datasets should have timeouts')
+				# final_timestep = (episode_step == 1000-1)
 			for k in ['observations', 'next_observations', 'actions', 'rewards', 'terminals']:
 				data_[k].append(dataset[k][i])
-			if done_bool or final_timestep:
+			end_of_episode = done_bool or final_timestep
+			if end_of_episode:
 				episode_step = 0
 				episode_data = {}
 				for k in data_:
@@ -48,3 +58,13 @@ for env_name in ['halfcheetah', 'hopper', 'walker2d']:
 
 		with open(f'{name}.pkl', 'wb') as f:
 			pickle.dump(paths, f)
+
+
+if __name__ == '__main__':
+	parser = argparse.ArgumentParser()
+	parser.add_argument("--suite", default="locomotion", type=str,
+					    choices=["locomotion", "antmaze"],
+						help="which suite of environments to download")
+	
+	args = parser.parse_args()
+	main(args.suite)

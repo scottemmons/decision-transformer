@@ -16,10 +16,12 @@ def main(suite):
 		env_names = ['halfcheetah', 'hopper', 'walker2d']
 		dataset_types = ['random', 'medium', 'medium-replay', 'medium-expert', 'expert']
 		names = [f'{env_name}-{dataset_type}-v2' for env_name in env_names for dataset_type in dataset_types]
+		keys = ['observations', 'next_observations', 'actions', 'rewards', 'terminals']
 	elif suite == "antmaze":
 		names = ['antmaze-umaze-v2', 'antmaze-umaze-diverse-v2',
 				 'antmaze-medium-play-v2', 'antmaze-medium-diverse-v2',
 				 'antmaze-large-play-v2', 'antmaze-large-diverse-v2']
+		keys = ['observations', 'actions', 'rewards', 'terminals']
 
 	for name in names:
 		env = gym.make(name)
@@ -39,7 +41,7 @@ def main(suite):
 			else:
 				raise RuntimeError('All datasets should have timeouts')
 				# final_timestep = (episode_step == 1000-1)
-			for k in ['observations', 'next_observations', 'actions', 'rewards', 'terminals']:
+			for k in keys:
 				data_[k].append(dataset[k][i])
 			end_of_episode = done_bool or final_timestep
 			if end_of_episode:

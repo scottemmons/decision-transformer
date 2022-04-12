@@ -1,0 +1,13 @@
+numpy
+psutil
+opencv-python
+atari-py
+pyprind
+tensorflow-gpu>=1.13
+absl-py
+atari-py
+gin-config
+gym
+tqdm
+blosc
+git+https://github.com/google/dopamine.git

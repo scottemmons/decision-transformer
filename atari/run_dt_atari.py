@@ -18,6 +18,7 @@ import pickle
 import blosc
 import argparse
 from create_dataset import create_dataset
+import wandb
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--seed', type=int, default=123)
@@ -31,6 +32,7 @@ parser.add_argument('--batch_size', type=int, default=128)
 # 
 parser.add_argument('--trajectories_per_buffer', type=int, default=10, help='Number of trajectories to sample from each of the buffers.')
 parser.add_argument('--data_dir_prefix', type=str, default='./dqn_replay/')
+parser.add_argument('--wandb_project', type=str, default='decision-transformer')
 args = parser.parse_args()
 
 set_seed(args.seed)
@@ -73,12 +75,24 @@ logging.basicConfig(
         datefmt="%m/%d/%Y %H:%M:%S",
         level=logging.INFO,
 )
+# initialize wandb here
+wandb_group = "atari-experiment-%s" % args.game
+wandb.init(
+    name=wandb_group + "-" + random.randint(int(1e5), int(1e6) - 1),
+    group=wandb_group,
+    project=args.wandb_project,
+    config=vars(args),
+)
 
 train_dataset = StateActionReturnDataset(obss, args.context_length*3, actions, done_idxs, rtgs, timesteps)
 
 mconf = GPTConfig(train_dataset.vocab_size, train_dataset.block_size,
                   n_layer=6, n_head=8, n_embd=128, model_type=args.model_type, max_timestep=max(timesteps))
 model = GPT(mconf)
+
+# log parameter count of model
+num_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
+wandb.config.update({"num_parameters": num_parameters})
 
 # initialize a trainer instance and kick off training
 epochs = args.epochs

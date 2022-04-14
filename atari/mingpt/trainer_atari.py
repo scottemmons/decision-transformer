@@ -34,6 +34,8 @@ import cv2
 import torch
 from PIL import Image
 
+import wandb
+
 class TrainerConfig:
     # optimization parameters
     max_epochs = 10
@@ -128,6 +130,9 @@ class Trainer:
                     else:
                         lr = config.learning_rate
 
+                    # log progress
+                    wandb.log("training/train_loss_mean", loss.item(), step=epoch_num)
+
                     # report progress
                     pbar.set_description(f"epoch {epoch+1} iter {it}: train loss {loss.item():.5f}. lr {lr:e}")
 
@@ -155,21 +160,25 @@ class Trainer:
             #     self.save_checkpoint()
 
             # -- pass in target returns
+            target_return = None
             if self.config.model_type == 'naive':
-                eval_return = self.get_returns(0)
+                target_return = 0
             elif self.config.model_type == 'reward_conditioned':
                 if self.config.game == 'Breakout':
-                    eval_return = self.get_returns(90)
+                    target_return = 90
                 elif self.config.game == 'Seaquest':
-                    eval_return = self.get_returns(1150)
+                    target_return = 1150
                 elif self.config.game == 'Qbert':
-                    eval_return = self.get_returns(14000)
+                    target_return = 14000
                 elif self.config.game == 'Pong':
-                    eval_return = self.get_returns(20)
+                    target_return = 20
                 else:
                     raise NotImplementedError()
             else:
                 raise NotImplementedError()
+            eval_return = self.get_returns(target_return)
+            wandb.log({"evaluation/target_%f_return_mean" % target_return: eval_return},
+                      step=epoch)
 
     def get_returns(self, ret):
         self.model.train(False)

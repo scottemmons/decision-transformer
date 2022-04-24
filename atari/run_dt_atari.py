@@ -23,6 +23,9 @@ import wandb
 parser = argparse.ArgumentParser()
 parser.add_argument('--seed', type=int, default=123)
 parser.add_argument('--context_length', type=int, default=30)
+parser.add_argument('--n_layer', type=int, default=6)
+parser.add_argument('--n_head', type=int, default=8)
+parser.add_argument('--n_embd', type=int, default=128)
 parser.add_argument('--epochs', type=int, default=5)
 parser.add_argument('--model_type', type=str, default='reward_conditioned')
 parser.add_argument('--num_steps', type=int, default=500000)
@@ -87,7 +90,8 @@ wandb.init(
 train_dataset = StateActionReturnDataset(obss, args.context_length*3, actions, done_idxs, rtgs, timesteps)
 
 mconf = GPTConfig(train_dataset.vocab_size, train_dataset.block_size,
-                  n_layer=6, n_head=8, n_embd=128, model_type=args.model_type, max_timestep=max(timesteps))
+                  n_layer=args.n_layer, n_head=args.n_head, n_embd=args.n_embd,
+                  model_type=args.model_type, max_timestep=max(timesteps))
 model = GPT(mconf)
 
 # log parameter count of model

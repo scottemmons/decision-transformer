@@ -81,7 +81,6 @@ logging.basicConfig(
 # initialize wandb here
 wandb_group = "atari-experiment-%s" % args.game
 wandb.init(
-    name="%s-%s" % (wandb_group, random.randint(int(1e5), int(1e6) - 1)),
     group=wandb_group,
     project=args.wandb_project,
     config=vars(args),

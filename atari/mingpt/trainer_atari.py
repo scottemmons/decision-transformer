@@ -131,7 +131,7 @@ class Trainer:
                         lr = config.learning_rate
 
                     # log progress
-                    wandb.log("training/train_loss_mean", loss.item(), step=epoch_num)
+                    wandb.log({"training/train_loss_mean": loss.item()}, step=epoch_num)
 
                     # report progress
                     pbar.set_description(f"epoch {epoch+1} iter {it}: train loss {loss.item():.5f}. lr {lr:e}")

@@ -84,8 +84,6 @@ RUN pip install -r /tmp/requirements.txt
 RUN wget http://www.atarimania.com/roms/Roms.rar -O /tmp/Roms.rar \
   && mkdir /tmp/roms \
   && unrar x /tmp/Roms.rar /tmp/roms \
-  && unzip /tmp/roms/ROMS.zip -d /tmp/roms \
-  && unzip /tmp/roms/HC\ ROMS.zip -d /tmp/roms \
   && rm /tmp/Roms.rar \
   && python -m atari_py.import_roms /tmp/roms \
   && rm -r /tmp/roms
